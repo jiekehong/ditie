@@ -1,0 +1,18 @@
+{
+  "name": "capability-map",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "build:static": "node build.mjs",
+    "serve": "node serve-dist.js",
+    "start": "node server.js",
+    "dev": "npm run build && node server.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^7.3.1",
+    "vite-plugin-singlefile": "^2.3.0"
+  }
+}

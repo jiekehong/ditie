@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>智能工作台 - 人员能力地图</title>
+    <!-- 引入 RemixIcon -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- 引入 Tippy.js 样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/animations/scale.css"/>
+    <!-- 引入 SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- 引入 Popper 和 Tippy -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  </head>
+  <body>
+    <div class="workspace-layout">
+      <!-- 顶部导航 -->
+      <header class="workspace-header">
+        <div class="brand">
+          <div class="logo-box"><i class="ri-mind-map"></i></div>
+          <span class="brand-text">智能工作台</span>
+        </div>
+        <nav class="top-nav">
+          <a href="index.html" class="nav-item"><i class="ri-map-2-line"></i> 地图视图</a>
+          <a href="table.html" class="nav-item"><i class="ri-table-line"></i> 表格视图</a>
+          <a href="workspace.html" class="nav-item active"><i class="ri-robot-2-line"></i> 智能助手</a>
+        </nav>
+        <div class="user-profile">
+          <img src="https://ui-avatars.com/api/?name=Admin&background=1890ff&color=fff" alt="User" class="avatar">
+        </div>
+      </header>
+
+      <!-- 主体内容 -->
+      <main class="workspace-body">
+        <!-- 左侧：工作展示区 -->
+        <section class="work-content" id="work-content">
+          <div class="empty-state">
+            <i class="ri-robot-2-line" style="font-size: 64px; color: #d9d9d9; margin-bottom: 24px;"></i>
+            <h3>你好，我是您的智能工作助理</h3>
+            <p>请在右侧对话框中 @ 相应的数字员工来获取帮助</p>
+            <div class="assistant-tips">
+              <span class="tip-tag">@数据分析师 查看销售报表</span>
+              <span class="tip-tag">@订单助手 查询最近订单</span>
+              <span class="tip-tag">@库存管理员 检查库存预警</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 右侧：对话区 -->
+        <aside class="chat-sidebar">
+          <div class="chat-header">
+            <span class="title">数字员工会话</span>
+            <span class="status-dot"></span>
+          </div>
+          <div class="chat-messages" id="chat-messages">
+            <!-- 消息会动态插入这里 -->
+            <div class="message system">
+              <div class="bubble">
+                已连接到企业数字大脑。您可以随时 @ 助手来协助您的工作。
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-area">
+            <div class="input-tools">
+              <i class="ri-mic-line"></i>
+              <i class="ri-image-line"></i>
+            </div>
+            <textarea id="chat-input" placeholder="输入 @ 召唤数字员工，或直接输入指令..." rows="1"></textarea>
+            <button id="send-btn" class="send-btn"><i class="ri-send-plane-fill"></i></button>
+          </div>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="./src/workspace.ts"></script>
+  </body>
+</html>

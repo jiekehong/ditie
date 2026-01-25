@@ -1,0 +1,5 @@
+<svg width="400" height="600" xmlns="http://www.w3.org/2000/svg">
+ <image href="https://images.unsplash.com/photo-1519457431-44ccd64a579b?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" width="400" height="600" opacity="0.5"/>
+ <rect x="100" y="150" width="200" height="250" fill="#fce4ec" opacity="0.8" />
+ <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="24" fill="#e91e63">Try-On Result</text>
+</svg>

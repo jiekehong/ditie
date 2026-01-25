@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>智能工作台 - 人员能力地图</title>
+    <!-- 引入 RemixIcon -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- 引入 Tippy.js 样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/animations/scale.css"/>
+    <!-- 引入 SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- 引入 Popper 和 Tippy -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script type="module" crossorigin>(function(){const a=document.createElement("link").relList;if(a&&a.supports&&a.supports("modulepreload"))return;for(const s of document.querySelectorAll('link[rel="modulepreload"]'))i(s);new MutationObserver(s=>{for(const n of s)if(n.type==="childList")for(const l of n.addedNodes)l.tagName==="LINK"&&l.rel==="modulepreload"&&i(l)}).observe(document,{childList:!0,subtree:!0});function t(s){const n={};return s.integrity&&(n.integrity=s.integrity),s.referrerPolicy&&(n.referrerPolicy=s.referrerPolicy),s.crossOrigin==="use-credentials"?n.credentials="include":s.crossOrigin==="anonymous"?n.credentials="omit":n.credentials="same-origin",n}function i(s){if(s.ep)return;s.ep=!0;const n=t(s);fetch(s.href,n)}})();const r={dates:["周一","周二","周三","周四","周五","周六","周日"],revenue:[12e3,13200,10100,13400,9e3,23e3,21e3],categories:[{value:1048,name:"男装"},{value:735,name:"女装"},{value:580,name:"童装"},{value:484,name:"配饰"},{value:300,name:"鞋履"}]},f=[{id:"ORD-2024001",customer:"张三",items:"羽绒服 x1, 围巾 x1",amount:"¥1,299.00",status:"已完成"},{id:"ORD-2024002",customer:"李四",items:"牛仔裤 x2",amount:"¥598.00",status:"配送中"},{id:"ORD-2024003",customer:"王五",items:"羊毛衫 x1",amount:"¥899.00",status:"待发货"},{id:"ORD-2024004",customer:"赵六",items:"运动鞋 x1",amount:"¥459.00",status:"已完成"},{id:"ORD-2024005",customer:"钱七",items:"卫衣 x1, 袜子 x3",amount:"¥320.00",status:"已取消"}],p=[{sku:"SKU-001",name:"经典白T恤",stock:12,threshold:20,status:"low"},{sku:"SKU-002",name:"黑色修身裤",stock:5,threshold:15,status:"critical"},{sku:"SKU-003",name:"印花连衣裙",stock:45,threshold:10,status:"normal"},{sku:"SKU-004",name:"加厚羽绒服",stock:8,threshold:10,status:"low"}],m=()=>{const e=document.getElementById("work-content");e.innerHTML=`
+    <div class="empty-state">
+      <i class="ri-robot-2-line" style="font-size: 64px; color: #d9d9d9; margin-bottom: 24px;"></i>
+      <h3>你好，我是您的智能工作助理</h3>
+      <p>请在右侧对话框中 @ 相应的数字员工来获取帮助</p>
+      <div class="assistant-tips">
+        <span class="tip-tag">@数据 查看销售报表</span>
+        <span class="tip-tag">@订单 查询最近订单</span>
+        <span class="tip-tag">@库存 检查库存预警</span>
+        <span class="tip-tag">@日报 生成今日总结</span>
+        <span class="tip-tag">@营销 策划活动方案</span>
+      </div>
+    </div>
+  `},u=()=>{const e=document.getElementById("work-content"),a="/public/images/result_tryon.svg";e.innerHTML=`
+    <div class="canvas-view">
+      <div class="canvas-header">
+        <h2><i class="ri-brush-line"></i> 智能设计工坊</h2>
+        <div class="actions">
+           <button class="btn small"><i class="ri-arrow-go-back-line"></i> 撤销</button>
+           <button class="btn small primary"><i class="ri-download-2-line"></i> 导出图片</button>
+        </div>
+      </div>
+      <div class="canvas-area">
+        <div class="canvas-toolbar">
+          <button class="tool-btn" title="Move"><i class="ri-drag-move-2-line"></i></button>
+          <button class="tool-btn" title="Crop"><i class="ri-crop-line"></i></button>
+          <button class="tool-btn" title="Filter"><i class="ri-magic-line"></i></button>
+          <button class="tool-btn" title="Text"><i class="ri-text"></i></button>
+        </div>
+        <img src="${a}" class="canvas-img" alt="Design Result">
+      </div>
+    </div>
+  `},y=()=>{let e=!1,a=!1;const t=()=>{const i=document.getElementById("btn-generate");i&&(i.disabled=!(e&&a))};Swal.fire({width:900,padding:"32px",showConfirmButton:!1,showCloseButton:!0,customClass:{popup:"de-swal-popup"},html:`
+      <div class="try-on-modal-content">
+        <h3>模特上身</h3>
+        <p class="subtitle">支持包袋、帽子、项链、耳饰、眼镜等配饰的智能试戴与换装</p>
+        
+        <div class="try-on-container">
+          <div class="upload-box" id="upload-model">
+            <i class="ri-user-smile-line"></i>
+            <p>拖拽或点击上传模特图</p>
+            <button class="btn-upload"><i class="ri-upload-2-line"></i> 本地上传</button>
+          </div>
+          
+          <div class="upload-box" id="upload-cloth">
+            <i class="ri-t-shirt-line"></i>
+            <p>拖拽或点击上传服饰图</p>
+            <button class="btn-upload"><i class="ri-upload-2-line"></i> 本地上传</button>
+          </div>
+        </div>
+
+        <div class="generate-section">
+           <button id="btn-generate" class="btn-generate" disabled>
+             <i class="ri-sparkling-2-fill"></i> 开始生成效果
+           </button>
+        </div>
+        
+        <div class="example-section">
+          <h4>快速尝试以下案例</h4>
+          <div class="example-grid">
+             <div class="example-item"><img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200&h=200&fit=crop"></div>
+             <div class="example-item"><img src="https://images.unsplash.com/photo-1529139574466-a302c27e3844?w=200&h=200&fit=crop"></div>
+             <div class="example-item"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=200&h=200&fit=crop"></div>
+          </div>
+        </div>
+      </div>
+    `,didOpen:()=>{const i=document.getElementById("upload-model");i?.addEventListener("click",()=>{e||(i.innerHTML='<img src="/public/images/model_boy.svg" class="preview-img">',i.classList.add("uploaded"),e=!0,t())});const s=document.getElementById("upload-cloth");s?.addEventListener("click",()=>{a||(s.innerHTML='<img src="/public/images/cloth_jacket.svg" class="preview-img">',s.classList.add("uploaded"),a=!0,t())}),document.getElementById("btn-generate")?.addEventListener("click",()=>{Swal.close();const o=document.getElementById("work-content");o.innerHTML=`
+           <div class="empty-state">
+             <div class="thinking-process" style="align-items:center">
+               <i class="ri-loader-4-line spinner" style="font-size:48px;color:#1890ff;margin-bottom:16px"></i>
+               <h3 style="color:#333">AI 正在进行融合设计...</h3>
+               <p style="color:#999">正在识别骨骼关键点、调整光影融合...</p>
+             </div>
+           </div>`,setTimeout(()=>{u()},2e3)}),document.querySelectorAll(".example-item").forEach(o=>{o.addEventListener("click",()=>{Swal.close(),u()})})}})},x=()=>{const e=document.getElementById("work-content");e.innerHTML=`
+    <div class="dashboard-container">
+      <div class="dashboard-header">
+        <h2>销售数据大屏</h2>
+        <span class="date-badge">2024-03-20 实时</span>
+      </div>
+      <div class="chart-row">
+        <div class="chart-card" id="chart-trend"></div>
+        <div class="chart-card" id="chart-pie"></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="label">今日营收</div>
+          <div class="value">¥23,400</div>
+          <div class="trend up">+12% <i class="ri-arrow-up-line"></i></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">客单价</div>
+          <div class="value">¥450</div>
+          <div class="trend down">-2% <i class="ri-arrow-down-line"></i></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">总订单</div>
+          <div class="value">52</div>
+          <div class="trend up">+5% <i class="ri-arrow-up-line"></i></div>
+        </div>
+      </div>
+    </div>
+  `,echarts.init(document.getElementById("chart-trend")).setOption({title:{text:"近7日营收趋势"},tooltip:{trigger:"axis"},xAxis:{type:"category",data:r.dates},yAxis:{type:"value"},series:[{data:r.revenue,type:"line",smooth:!0,itemStyle:{color:"#1890ff"},areaStyle:{opacity:.1}}]}),echarts.init(document.getElementById("chart-pie")).setOption({title:{text:"品类销售占比"},tooltip:{trigger:"item"},series:[{type:"pie",radius:["40%","70%"],data:r.categories,itemStyle:{borderRadius:5}}]})},L=()=>{const e=document.getElementById("work-content"),a=f.map(t=>`
+    <tr>
+      <td>${t.id}</td>
+      <td>${t.customer}</td>
+      <td>${t.items}</td>
+      <td style="font-weight:bold">${t.amount}</td>
+      <td><span class="status-badge ${$(t.status)}">${t.status}</span></td>
+      <td><button class="action-btn">查看</button></td>
+    </tr>
+  `).join("");e.innerHTML=`
+    <div class="list-container">
+      <div class="list-header">
+        <h2>最近订单列表</h2>
+        <div class="actions">
+          <button class="btn primary"><i class="ri-download-line"></i> 导出</button>
+        </div>
+      </div>
+      <table class="workspace-table">
+        <thead>
+          <tr>
+            <th>订单号</th>
+            <th>客户</th>
+            <th>商品内容</th>
+            <th>金额</th>
+            <th>状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>${a}</tbody>
+      </table>
+    </div>
+  `},w=()=>{const e=document.getElementById("work-content"),a=p.map(t=>`
+    <tr>
+      <td>${t.sku}</td>
+      <td>${t.name}</td>
+      <td style="color:${t.stock<t.threshold?"#ff4d4f":"#333"};font-weight:bold">${t.stock}</td>
+      <td>${t.threshold}</td>
+      <td><span class="status-badge ${t.status==="normal"?"success":"error"}">${t.status==="normal"?"正常":"缺货预警"}</span></td>
+      <td><button class="action-btn">补货</button></td>
+    </tr>
+  `).join("");e.innerHTML=`
+    <div class="list-container">
+      <div class="list-header">
+        <h2>库存预警中心</h2>
+        <div class="actions">
+          <button class="btn primary">一键补货</button>
+        </div>
+      </div>
+      <div class="alert-banner error">
+        <i class="ri-alarm-warning-line"></i> 当前有 ${p.filter(t=>t.status!=="normal").length} 款商品库存低于警戒线，请及时处理。
+      </div>
+      <table class="workspace-table">
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>商品名称</th>
+            <th>当前库存</th>
+            <th>警戒线</th>
+            <th>状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>${a}</tbody>
+      </table>
+    </div>
+  `},k=(e=!1)=>{const a=document.getElementById("work-content");let t="<p>今日总销售额 ¥23,400，达成日目标的 112%。客流人数 1,208 人，转化率 4.3%。</p>";if(e){const i=r.revenue[r.revenue.length-1],s=r.categories.sort((n,l)=>l.value-n.value)[0];t=`
+        <div class="highlight-box" style="background: #e6f7ff; padding: 10px; border-left: 4px solid #1890ff; margin: 10px 0; border-radius: 4px;">
+            <strong><i class="ri-database-2-line"></i> 数据助手协同数据：</strong><br>
+            今日实时营收：<span style="color: #cf1322; font-weight: bold;">¥${i.toLocaleString()}</span><br>
+            热销品类TOP1：${s.name} (销量 ${s.value})
+        </div>
+        <p>今日总销售额 ¥${i.toLocaleString()}，达成日目标的 112%。客流人数 1,208 人，转化率 4.3%。</p>
+     `}a.innerHTML=`
+    <div class="report-paper">
+      <div class="paper-header">
+        <h1>2024-03-20 门店运营日报</h1>
+        <div class="meta">生成时间：18:30 | 生成人：汇报助手001</div>
+      </div>
+      <div class="paper-content">
+        <h3>一、核心指标达成</h3>
+        ${t}
+        
+        <h3>二、商品销售概况</h3>
+        <p>男装品类表现优异，特别是春季新款夹克售罄率达到 85%。童装区受促销活动影响，销量较昨日环比增长 20%。</p>
+        
+        <h3>三、门店运营异常</h3>
+        <p>1. 试衣间排队时间平均超过 15 分钟，建议周末增加临时试衣区。</p>
+        <p>2. SKU-002 黑色修身裤库存严重不足，已触发紧急补货申请。</p>
+        
+        <h3>四、明日计划</h3>
+        <p>重点推广新到货的夏季T恤系列，调整橱窗陈列主题为“清凉一夏”。</p>
+      </div>
+      <div class="paper-footer">
+        <button class="btn primary">确认并归档</button>
+        <button class="btn">分享到群</button>
+      </div>
+    </div>
+  `},E=()=>{const e=document.getElementById("work-content");e.innerHTML=`
+    <div class="marketing-plan">
+      <div class="plan-header">
+        <h2>夏季新品推广方案</h2>
+        <span class="status-badge processing">进行中</span>
+      </div>
+      <div class="plan-grid">
+        <div class="plan-card">
+          <div class="icon-box"><i class="ri-wechat-line"></i></div>
+          <h4>私域流量</h4>
+          <p>目标：触达 5000+ 会员</p>
+          <div class="progress-bar"><div class="fill" style="width: 60%"></div></div>
+        </div>
+        <div class="plan-card">
+          <div class="icon-box"><i class="ri-store-line"></i></div>
+          <h4>门店陈列</h4>
+          <p>主题：海岛度假风</p>
+          <div class="progress-bar"><div class="fill" style="width: 100%"></div></div>
+        </div>
+        <div class="plan-card">
+          <div class="icon-box"><i class="ri-coupon-3-line"></i></div>
+          <h4>优惠券发放</h4>
+          <p>满500减50，发放1000张</p>
+          <div class="progress-bar"><div class="fill" style="width: 30%"></div></div>
+        </div>
+      </div>
+      <div class="ai-suggestion">
+        <h4><i class="ri-sparkling-fill"></i> AI 优化建议</h4>
+        <p>根据历史数据分析，建议将“满500减50”的门槛降低至400元，预计可提升转化率 15%。</p>
+        <button class="btn primary small">采纳建议</button>
+      </div>
+    </div>
+  `},g=[{id:"data",name:"数据分析师",role:"Data Analyst",trigger:"数据",avatar:"https://api.dicebear.com/7.x/avataaars/svg?seed=Data",color:"#1890ff",complexity:"simple",action:()=>(x(),`
+        已为您生成今日最新的销售数据大屏，请查看左侧工作区。
+        <div class="confirm-box" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0;">
+          <p style="margin-bottom: 8px; font-size: 13px; color: #595959;">是否需要根据今日的运营情况完成日报编写？</p>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn small primary btn-yes">是，生成日报</button>
+            <button class="btn small btn-no">否</button>
+          </div>
+        </div>
+      `)},{id:"order",name:"订单助手",role:"Order Specialist",trigger:"订单",avatar:"https://api.dicebear.com/7.x/avataaars/svg?seed=Order",color:"#52c41a",complexity:"simple",action:()=>(L(),"已检索到最近的 5 笔订单记录，您可以进行查看或导出。")},{id:"stock",name:"库存管理员",role:"Inventory Manager",trigger:"库存",avatar:"https://api.dicebear.com/7.x/avataaars/svg?seed=Stock",color:"#ff4d4f",complexity:"simple",action:()=>(w(),"库存检查完成。发现 2 款商品库存不足，已在左侧列出预警清单。")},{id:"report",name:"汇报助手",role:"Reporter",trigger:"日报",avatar:"https://api.dicebear.com/7.x/avataaars/svg?seed=Report",color:"#722ed1",complexity:"complex",action:e=>{const a=e.includes("@数据")||e.includes("数据分析师")||e.includes("@Data");return k(a),a?"收到！已协同 @数据分析师 获取最新营收数据，并为您生成了包含详细指标的运营日报。":"今日运营日报已自动生成，汇总了销售、客流及异常情况，请审阅。"}},{id:"marketing",name:"营销策划",role:"Marketing",trigger:"营销",avatar:"https://api.dicebear.com/7.x/avataaars/svg?seed=Market",color:"#fa8c16",complexity:"complex",action:()=>(E(),"已加载夏季新品推广方案，并根据数据提供了 AI 优化建议。")},{id:"design",name:"设计助手",role:"Creative Design",trigger:"设计",avatar:"https://api.dicebear.com/7.x/avataaars/svg?seed=Design",color:"#eb2f96",complexity:"simple",action:()=>(y(),"正在为您打开智能设计工坊，请在弹窗中上传素材。")}],$=e=>e==="已完成"?"success":e==="已取消"?"error":"processing",v=(e,a,t)=>{const i=document.getElementById("chat-messages"),s=document.createElement("div");return s.className=`message ${a}`,a==="assistant"&&t?s.innerHTML=`
+      <div class="avatar"><img src="${t.avatar}"></div>
+      <div class="content">
+        <div class="name">${t.name} <span class="role">${t.role}</span></div>
+        <div class="bubble">${e}</div>
+      </div>
+    `:a==="user"?s.innerHTML=`
+      <div class="bubble">${e}</div>
+      <div class="avatar"><img src="https://ui-avatars.com/api/?name=Admin&background=1890ff&color=fff"></div>
+    `:s.innerHTML=`<div class="bubble">${e}</div>`,i.appendChild(s),i.scrollTop=i.scrollHeight,s},S=async e=>{const a=document.getElementById("chat-messages"),t=document.createElement("div");t.className="message assistant thinking",t.innerHTML=`
+    <div class="avatar"><img src="${e.avatar}"></div>
+    <div class="content">
+      <div class="name">${e.name} <span class="role">${e.role}</span></div>
+      <div class="bubble">
+        <div class="thinking-process">
+          <div class="thinking-step"><i class="ri-loader-4-line spinner"></i> 正在理解意图...</div>
+        </div>
+        <div class="typing-indicator">
+          <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+        </div>
+      </div>
+    </div>
+  `,a.appendChild(t),a.scrollTop=a.scrollHeight;const i=["正在查询相关数据...","正在分析业务逻辑...","正在生成可视化报表...","整理最终结果..."],s=t.querySelector(".thinking-process");for(const n of i){await new Promise(c=>setTimeout(c,800));const l=s.lastElementChild;l&&(l.innerHTML=`<i class="ri-checkbox-circle-fill" style="color:#52c41a"></i> ${l.innerText.replace("...","")}`,l.classList.add("done"));const o=document.createElement("div");o.className="thinking-step",o.innerHTML=`<i class="ri-loader-4-line spinner"></i> ${n}`,s.appendChild(o),a.scrollTop=a.scrollHeight}await new Promise(n=>setTimeout(n,800)),t.remove()},h=()=>{let e=document.querySelector(".suggestion-list");e||(e=document.createElement("div"),e.className="suggestion-list",document.querySelector(".chat-input-area").appendChild(e));const a=g.map(t=>`
+    <div class="suggestion-item" data-trigger="${t.trigger}">
+      <img src="${t.avatar}">
+      <div style="flex:1">
+        <div class="name">${t.name}</div>
+      </div>
+      <span class="trigger">@${t.trigger}</span>
+    </div>
+  `).join("");e.innerHTML=a,e.querySelectorAll(".suggestion-item").forEach(t=>{t.addEventListener("click",()=>{const i=t.dataset.trigger,s=document.getElementById("chat-input"),n=s.value,l=n.lastIndexOf("@");s.value=n.substring(0,l)+`@${i} `,s.focus(),e.classList.remove("visible")})})},d=async()=>{const e=document.getElementById("chat-input"),a=document.querySelector(".suggestion-list"),t=e.value.trim();t&&(a?.classList.remove("visible"),v(t,"user"),e.value="",await b(t))},b=async e=>{let a=!1;for(const t of g)if(e.startsWith(`@${t.trigger}`)||e.includes(t.name)){a=!0,t.complexity==="complex"?await S(t):await new Promise(n=>setTimeout(n,500));const i=t.action(e),s=v(i,"assistant",t);if(t.id==="data"){const n=s.querySelector(".btn-yes"),l=s.querySelector(".btn-no"),o=s.querySelector(".confirm-box");n&&o&&n.addEventListener("click",()=>{o.innerHTML='<span style="color:#52c41a; font-size:12px"><i class="ri-checkbox-circle-fill"></i> 已确认，正在唤起汇报助手...</span>',b("@汇报助手 根据@数据助手的今日数据，生成今天的工作日报")}),l&&o&&l.addEventListener("click",()=>{o.remove()})}break}a||setTimeout(()=>{v("抱歉，我没有找到相关的数字员工。您可以尝试 @数据、@订单、@库存、@日报 或 @营销。","system")},600)};document.addEventListener("DOMContentLoaded",()=>{const e=document.getElementById("chat-input"),a=document.getElementById("send-btn");h();const t=document.querySelector(".suggestion-list");let i=0;const s=()=>{t.querySelectorAll(".suggestion-item").forEach((l,o)=>{o===i?(l.classList.add("active"),l.scrollIntoView({block:"nearest"})):l.classList.remove("active")})};e.addEventListener("input",n=>{const l=e.value,o=l.slice(-1);if(l.includes("@")){const c=l.split("@").pop();c!==void 0&&c.length<15&&!c.includes(" ")?(t.classList.add("visible"),(!t.classList.contains("visible")||i<0)&&(i=0),s()):o==="@"?(t.classList.add("visible"),i=0,s()):(t.classList.remove("visible"),i=0)}else t.classList.remove("visible"),i=0}),e.addEventListener("keydown",n=>{if(t.classList.contains("visible")){const o=t.querySelectorAll(".suggestion-item");if(n.key==="ArrowDown"){n.preventDefault(),i=(i+1)%o.length,s();return}else if(n.key==="ArrowUp"){n.preventDefault(),i=(i-1+o.length)%o.length,s();return}else if(n.key==="Enter"){n.preventDefault(),i>=0&&o[i]&&(o[i].click(),i=0,s());return}}n.key==="Enter"&&!n.shiftKey&&(n.preventDefault(),d())}),a.addEventListener("click",d),m()});document.addEventListener("DOMContentLoaded",()=>{const e=document.getElementById("chat-input"),a=document.getElementById("send-btn");h();const t=document.querySelector(".suggestion-list");e.addEventListener("input",i=>{const s=e.value,n=s.slice(-1);if(s.includes("@")){const l=s.split("@").pop();l!==void 0&&l.length<15&&!l.includes(" ")||n==="@"?t.classList.add("visible"):t.classList.remove("visible")}else t.classList.remove("visible")}),e.addEventListener("keypress",i=>{i.key==="Enter"&&!i.shiftKey&&(i.preventDefault(),d())}),a.addEventListener("click",d),m()});</script>
+    <style rel="stylesheet" crossorigin>:root{--primary-color: #1677ff;--primary-bg: #e6f4ff;--success-color: #52c41a;--warning-color: #faad14;--error-color: #ff4d4f;--text-primary: #1f1f1f;--text-secondary: #595959;--text-tertiary: #8c8c8c;--bg-color-base: #f0f2f5;--bg-color-container: #ffffff;--border-color-base: #d9d9d9;--border-color-split: #f0f0f0;--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, .03), 0 1px 6px -1px rgba(0, 0, 0, .02), 0 2px 4px 0 rgba(0, 0, 0, .02);--shadow-base: 0 6px 16px 0 rgba(0, 0, 0, .08), 0 3px 6px -4px rgba(0, 0, 0, .12), 0 9px 28px 8px rgba(0, 0, 0, .05);--radius-base: 6px;--radius-lg: 8px;--branch-height: 260px;--de-gradient: linear-gradient(135deg, #ff7875 0%, #ff4d4f 100%)}*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif;background-color:var(--bg-color-base);color:var(--text-primary);margin:0;line-height:1.5715;-webkit-font-smoothing:antialiased;overflow:hidden;height:100vh}h2{margin:0;font-weight:600;font-size:24px;color:var(--text-primary)}.scroll-viewport{width:100%;height:100%;overflow:auto;cursor:grab;padding:40px;scrollbar-width:none}.scroll-viewport::-webkit-scrollbar{display:none}.scroll-viewport.active{cursor:grabbing;-webkit-user-select:none;user-select:none}.container{display:flex;flex-direction:column;gap:48px;padding-bottom:80px;min-width:fit-content;transform-origin:center top;animation:fadeIn .6s cubic-bezier(.16,1,.3,1)}@keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.header{text-align:center;margin-bottom:24px}.header .badge{background:var(--primary-bg);color:var(--primary-color);font-size:14px;padding:2px 10px;border-radius:20px;vertical-align:middle;margin-left:8px;font-weight:400}.header .subtitle{color:var(--text-tertiary);margin-top:8px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px}.nav-switch{display:inline-flex;background:#eef0f4;padding:4px;border-radius:8px;margin-bottom:24px}.nav-btn{padding:6px 20px;border-radius:6px;text-decoration:none;color:var(--text-secondary);font-size:14px;font-weight:500;transition:all .2s;display:flex;align-items:center;gap:6px}.nav-btn.active{background:#fff;color:var(--primary-color);box-shadow:0 2px 8px #00000014;font-weight:600}.nav-btn:hover:not(.active){color:var(--text-primary);background:#fff9}.lane-wrapper{position:relative;display:flex;align-items:center;min-width:max-content}.lane-title{width:48px;padding:24px 8px;background:var(--primary-color);color:#fff;font-weight:600;text-align:center;border-radius:var(--radius-lg);margin-right:64px;flex-shrink:0;writing-mode:vertical-rl;letter-spacing:4px;box-shadow:0 4px 12px #1677ff4d;z-index:10}.roles-track{display:flex;align-items:flex-start;gap:80px;position:relative;flex-grow:1}.roles-track:before{content:"";position:absolute;left:-20px;right:0;top:calc(var(--branch-height) + 25px);height:2px;background:#e5e7eb;z-index:0}.role-group{display:flex;flex-direction:column;align-items:center;position:relative;z-index:1;flex-shrink:0;min-width:200px;transition:opacity .3s}.role-group.dimmed{opacity:.3;filter:grayscale(100%)}.role-group:after{content:"";position:absolute;width:2px;background:#e5e7eb;top:50%;bottom:50%;left:50%;z-index:0;transition:all .3s}.role-group.has-top:after{top:calc(var(--branch-height) - 12px)}.role-group.has-bottom:after{bottom:calc(var(--branch-height) - 12px)}.role-node-wrapper{height:50px;display:flex;align-items:center;justify-content:center;position:relative;z-index:2}.role-node{background:#fff;border-radius:25px;box-shadow:var(--shadow-base);border:2px solid transparent;min-width:140px;overflow:hidden;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}.role-group:hover .role-node{transform:scale(1.08);box-shadow:0 12px 32px #00000026}.role-name{font-size:14px;font-weight:600;padding:8px 16px;text-align:center;color:var(--text-primary)}.role-metrics{display:flex;background:#fafafa;padding:5px 12px;border-top:1px solid #f0f0f0;justify-content:space-between;font-size:11px}.metric-item{display:flex;align-items:center;gap:4px}.metric-item .label{color:var(--text-tertiary)}.metric-item .value{font-weight:700;color:var(--text-secondary);font-family:Roboto Mono,monospace}.metric-item .value.high,.rate-tag.high{color:var(--success-color)}.branches-top-area,.branches-bottom-area{height:var(--branch-height);display:flex;justify-content:center;width:100%;position:relative}.branches-top-area{align-items:flex-end;padding-bottom:24px}.branches-bottom-area{align-items:flex-start;padding-top:24px}.branches-container{display:flex;gap:12px}.resp-card{background:#fffffff2;border:1px solid var(--border-color-split);border-radius:var(--radius-base);padding:12px;width:168px;box-shadow:var(--shadow-sm);position:relative;transition:all .2s;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}.role-group:hover .resp-card{border-color:#d9d9d9}.resp-card:hover{transform:translateY(-4px);border-color:var(--primary-color)!important;box-shadow:var(--shadow-base)!important;z-index:10}.resp-title{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed var(--border-color-split);text-align:center}.tool-list{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.tool-tag{background:var(--primary-bg);color:var(--primary-color);font-size:11px;padding:2px 8px;border-radius:4px;white-space:nowrap}.resp-card:hover .tool-tag{background:#fff;border:1px solid var(--primary-bg)}.resp-card:before{content:"";position:absolute;width:1px;background:#e5e7eb;left:50%;height:24px;transition:background .2s}.role-group:hover .resp-card:before{background:#bfbfbf}.branches-top-area .resp-card:before{top:100%}.branches-bottom-area .resp-card:before{bottom:100%}.de-card{position:absolute;left:50%;margin-left:80px;top:calc(var(--branch-height) - 40px);background:var(--de-gradient);color:#fff;padding:6px 16px;border-radius:20px;font-size:12px;box-shadow:0 4px 12px #ff4d4f59;z-index:5;transition:transform .2s;animation:float 3s ease-in-out infinite;cursor:pointer}.de-card:hover{transform:scale(1.05) translateY(-2px);animation:none}@keyframes float{0%,to{transform:translateY(0)}50%{transform:translateY(-6px)}}.de-card:after{content:"";position:absolute;right:100%;top:50%;width:20px;height:1px;border-top:1px dashed #ffccc7}.de-title{font-weight:700;display:flex;align-items:center;gap:4px}.de-desc{font-size:10px;opacity:.9;margin-top:2px}.table-wrapper{background:#fff;border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-sm);overflow-x:auto}.data-table{width:100%;border-collapse:collapse;font-size:13px;min-width:1000px}.data-table th{background:#fafafa;padding:16px;text-align:left;font-weight:600;color:var(--text-secondary);border-bottom:1px solid #f0f0f0}.data-table td{padding:16px;border-bottom:1px solid #f0f0f0;color:var(--text-primary);vertical-align:middle}.data-table tr:hover{background:#fafafa}.lane-tag{padding:4px 12px;border-radius:4px;font-weight:500;font-size:12px}.de-pill{display:inline-flex;align-items:center;gap:6px;background:#fff0f6;color:#c41d7f;padding:4px 12px;border-radius:12px;border:1px solid #ffadd2;font-size:12px;transition:all .2s}.de-pill:hover{background:#ffadd2;color:#fff;transform:translateY(-1px);box-shadow:0 2px 8px #c41d7f33}.small-text{color:var(--text-secondary);line-height:1.6}.table-tool-list{display:flex;flex-wrap:wrap;gap:6px}.th-with-tooltip{display:inline-flex;align-items:center;gap:4px;cursor:help;border-bottom:1px dashed var(--text-tertiary)}.th-with-tooltip i{color:var(--text-tertiary)}.de-swal-popup{border-radius:12px!important;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif!important}.workspace-layout{display:flex;flex-direction:column;height:100vh;background:#f0f2f5}.workspace-header{height:64px;background:#fff;border-bottom:1px solid var(--border-color-split);display:flex;align-items:center;padding:0 24px;justify-content:space-between;box-shadow:0 1px 4px #0000000d;z-index:100}.brand{display:flex;align-items:center;gap:12px}.logo-box{width:32px;height:32px;background:var(--primary-color);color:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px}.brand-text{font-size:18px;font-weight:600;color:#000}.top-nav{display:flex;gap:8px}.top-nav .nav-item{padding:8px 16px;border-radius:6px;color:var(--text-secondary);text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:500;transition:all .2s}.top-nav .nav-item:hover{background:#f5f5f5;color:var(--text-primary)}.top-nav .nav-item.active{background:var(--primary-bg);color:var(--primary-color)}.user-profile .avatar{width:32px;height:32px;border-radius:50%;cursor:pointer}.workspace-body{flex:1;display:flex;overflow:hidden;padding:16px;gap:16px}.work-content{flex:1;background:#fff;border-radius:12px;box-shadow:var(--shadow-sm);overflow-y:auto;padding:24px;position:relative}.empty-state{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-tertiary)}.assistant-tips{margin-top:32px;display:flex;flex-wrap:wrap;gap:12px;justify-content:center;max-width:600px}.tip-tag{background:#f5f5f5;padding:6px 16px;border-radius:20px;font-size:13px;color:var(--text-secondary);border:1px solid #e5e5e5;cursor:pointer}.tip-tag:hover{border-color:var(--primary-color);color:var(--primary-color);background:#fff}.chat-sidebar{width:360px;background:#fff;border-radius:12px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;overflow:hidden}.chat-header{padding:16px 20px;border-bottom:1px solid var(--border-color-split);display:flex;align-items:center;justify-content:space-between;font-weight:600}.status-dot{width:8px;height:8px;background:#52c41a;border-radius:50%;box-shadow:0 0 0 4px #f6ffed}.chat-messages{flex:1;overflow-y:auto;padding:20px;background:#fafafa;display:flex;flex-direction:column;gap:16px}.message{display:flex;gap:12px;max-width:90%}.message.user{align-self:flex-end;flex-direction:row-reverse}.message.system{align-self:center;max-width:100%;margin:8px 0}.message.system .bubble{background:#f0f0f0;color:#999;font-size:12px;padding:4px 12px;border-radius:12px;box-shadow:none}.message .avatar img{width:36px;height:36px;border-radius:50%}.message .content{display:flex;flex-direction:column;gap:4px}.message .name{font-size:12px;color:#999;display:flex;align-items:center;gap:6px}.message .role{background:#e6f7ff;color:#1890ff;padding:1px 4px;border-radius:4px;transform:scale(.9);transform-origin:left}.message .bubble{background:#fff;padding:10px 14px;border-radius:0 12px 12px;box-shadow:0 1px 2px #0000000d;font-size:14px;line-height:1.5;color:#333}.message.assistant .bubble{border-radius:0 12px 12px}.message.user .bubble{background:var(--primary-color);color:#fff;border-radius:12px 0 12px 12px}.chat-input-area{padding:16px;border-top:1px solid var(--border-color-split);background:#fff;position:relative}.input-tools{display:flex;gap:12px;color:#999;margin-bottom:8px;font-size:18px}.input-tools i:hover{color:var(--primary-color);cursor:pointer}#chat-input{width:100%;border:none;outline:none;resize:none;font-size:14px;max-height:80px;font-family:inherit}.send-btn{float:right;background:var(--primary-color);color:#fff;border:none;width:32px;height:32px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}.send-btn:hover{background:#4096ff}.dashboard-container{padding:0}.dashboard-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.date-badge{background:#fffbe6;color:#faad14;padding:4px 12px;border-radius:4px;font-size:13px;border:1px solid #ffe58f}.chart-row{display:flex;gap:24px;margin-bottom:24px;height:320px}.chart-card{flex:1;background:#fff;border:1px solid #f0f0f0;border-radius:8px;padding:16px}.stats-row{display:flex;gap:24px}.stat-card{flex:1;background:linear-gradient(135deg,#fff,#f9f9f9);border:1px solid #f0f0f0;padding:20px;border-radius:8px;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}.stat-card:after{content:"";position:absolute;right:-10px;bottom:-10px;width:60px;height:60px;background:var(--primary-bg);border-radius:50%;opacity:.5}.stat-card .label{color:#8c8c8c;font-size:13px}.stat-card .value{font-size:24px;font-weight:700;color:#333}.stat-card .trend{font-size:12px;display:flex;align-items:center;gap:4px}.trend.up{color:#52c41a}.trend.down{color:#ff4d4f}.list-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.btn{padding:6px 16px;border-radius:6px;border:1px solid #d9d9d9;background:#fff;cursor:pointer;transition:all .2s;font-size:14px}.btn.primary{background:var(--primary-color);color:#fff;border:none}.btn:hover{opacity:.9}.btn.small{padding:4px 12px;font-size:12px}.workspace-table{width:100%;border-collapse:collapse}.workspace-table th{text-align:left;padding:12px;background:#fafafa;border-bottom:1px solid #f0f0f0;color:#666;font-weight:500}.workspace-table td{padding:12px;border-bottom:1px solid #f0f0f0;color:#333}.status-badge{padding:2px 8px;border-radius:4px;font-size:12px}.status-badge.success{background:#f6ffed;color:#52c41a;border:1px solid #b7eb8f}.status-badge.processing{background:#e6f7ff;color:#1890ff;border:1px solid #91d5ff}.status-badge.error{background:#fff2f0;color:#ff4d4f;border:1px solid #ffccc7}.action-btn{border:none;background:none;color:var(--primary-color);cursor:pointer}.alert-banner{padding:12px 16px;border-radius:6px;margin-bottom:16px;display:flex;align-items:center;gap:8px}.alert-banner.error{background:#fff2f0;border:1px solid #ffccc7;color:#ff4d4f}.report-paper{max-width:800px;margin:0 auto;background:#fff;padding:40px;box-shadow:0 4px 24px #0000000d;border:1px solid #f0f0f0}.paper-header{text-align:center;margin-bottom:32px;border-bottom:2px solid #333;padding-bottom:16px}.paper-header h1{font-size:24px;margin-bottom:8px}.paper-header .meta{color:#999;font-size:12px}.paper-content h3{font-size:16px;margin:24px 0 12px;color:#333}.paper-content p{line-height:1.8;color:#555;margin-bottom:12px;text-indent:2em}.paper-footer{margin-top:40px;display:flex;justify-content:center;gap:16px}.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}.plan-card{border:1px solid #f0f0f0;padding:20px;border-radius:8px;text-align:center;transition:all .2s}.plan-card:hover{box-shadow:var(--shadow-base);transform:translateY(-4px)}.plan-card .icon-box{width:48px;height:48px;background:var(--primary-bg);color:var(--primary-color);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px}.plan-card h4{margin:0 0 8px}.plan-card p{font-size:12px;color:#888;margin-bottom:16px}.progress-bar{height:6px;background:#f5f5f5;border-radius:3px;overflow:hidden}.progress-bar .fill{height:100%;background:linear-gradient(90deg,#1890ff,#69c0ff)}.ai-suggestion{margin-top:24px;background:linear-gradient(135deg,#f9f0ff,#fff);border:1px solid #d3adf7;padding:16px;border-radius:8px}.ai-suggestion h4{color:#722ed1;margin:0 0 8px;display:flex;align-items:center;gap:8px}.ai-suggestion p{color:#666;font-size:13px;line-height:1.6}.suggestion-list{position:absolute;bottom:100%;left:16px;width:240px;background:#fff;border-radius:8px;box-shadow:0 4px 12px #00000026;border:1px solid #f0f0f0;overflow:hidden;z-index:1000;display:none;margin-bottom:8px}.suggestion-list.visible{display:block;animation:slideUp .2s ease-out}@keyframes slideUp{0%{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.suggestion-item{padding:10px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .2s}.suggestion-item:hover,.suggestion-item.active{background:#f5f7fa}.suggestion-item img{width:24px;height:24px;border-radius:50%}.suggestion-item .name{font-size:13px;font-weight:500;color:#333}.suggestion-item .trigger{font-size:12px;color:#999;margin-left:auto}.typing-indicator{display:flex;gap:4px;padding:4px 8px}.typing-dot{width:6px;height:6px;background:#ccc;border-radius:50%;animation:bounce 1.4s infinite ease-in-out both}.typing-dot:nth-child(1){animation-delay:-.32s}.typing-dot:nth-child(2){animation-delay:-.16s}@keyframes bounce{0%,80%,to{transform:scale(0)}40%{transform:scale(1)}}.thinking-process{font-size:12px;color:#8c8c8c;margin-bottom:8px;display:flex;flex-direction:column;gap:4px}.thinking-step{display:flex;align-items:center;gap:6px}.thinking-step.done{color:#52c41a}.thinking-step i{font-size:14px}.thinking-step .spinner{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.try-on-modal-content{text-align:left;padding:0 10px}.try-on-modal-content h3{margin-top:0;margin-bottom:8px;font-size:24px;font-weight:600;color:#333}.try-on-modal-content .subtitle{color:#999;font-size:14px;margin-bottom:32px}.try-on-container{display:flex;gap:24px;margin-bottom:32px}.upload-box{flex:1;border:2px dashed #e8e8e8;border-radius:12px;height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fafafa;transition:all .3s;cursor:pointer;position:relative;overflow:hidden}.upload-box:hover{border-color:var(--primary-color);background:#f0f7ff}.upload-box.uploaded{border-style:solid;border-color:#52c41a;background:#fff}.upload-box i{font-size:40px;color:#bfbfbf;margin-bottom:16px;transition:color .3s}.upload-box:hover i{color:var(--primary-color)}.upload-box p{color:#666;font-size:14px;margin-bottom:20px;font-weight:500}.btn-upload{background:#722ed1;color:#fff;border:none;padding:8px 24px;border-radius:20px;font-size:14px;display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 10px #722ed133;transition:all .2s}.btn-upload:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 6px 12px #722ed14d}.preview-img{width:100%;height:100%;object-fit:cover}.generate-section{text-align:center;margin-top:32px;border-top:1px solid #f0f0f0;padding-top:24px}.btn-generate{background:linear-gradient(135deg,#1677ff,#722ed1);color:#fff;border:none;padding:12px 48px;font-size:16px;font-weight:600;border-radius:24px;cursor:pointer;box-shadow:0 4px 15px #1677ff4d;transition:all .3s}.btn-generate:disabled{background:#d9d9d9;cursor:not-allowed;box-shadow:none;opacity:.7}.btn-generate:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 8px 20px #1677ff66}.example-section{margin-top:32px}.example-section h4{font-size:14px;color:#666;margin-bottom:12px;font-weight:500;text-align:center;position:relative}.example-section h4:before,.example-section h4:after{content:"";display:inline-block;width:40px;height:1px;background:#e8e8e8;vertical-align:middle;margin:0 12px}.example-grid{display:flex;gap:16px;justify-content:center}.example-item{width:80px;height:80px;border-radius:4px;overflow:hidden;cursor:pointer;border:2px solid transparent}.example-item:hover{border-color:var(--primary-color)}.example-item img{width:100%;height:100%;object-fit:cover}.canvas-view{height:100%;display:flex;flex-direction:column}.canvas-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.canvas-area{flex:1;background:#f0f2f5;border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background-image:linear-gradient(45deg,#e6e6e6 25%,transparent 25%),linear-gradient(-45deg,#e6e6e6 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e6e6e6 75%),linear-gradient(-45deg,transparent 75%,#e6e6e6 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0px}.canvas-img{max-width:90%;max-height:90%;box-shadow:0 8px 24px #0000001a;border-radius:4px}.canvas-toolbar{position:absolute;bottom:24px;background:#0009;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);padding:8px 16px;border-radius:20px;display:flex;gap:16px}.tool-btn{color:#fff;background:none;border:none;font-size:20px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:4px}.tool-btn:hover{background:#fff3}</style>
+  </head>
+  <body>
+    <div class="workspace-layout">
+      <!-- 顶部导航 -->
+      <header class="workspace-header">
+        <div class="brand">
+          <div class="logo-box"><i class="ri-mind-map"></i></div>
+          <span class="brand-text">智能工作台</span>
+        </div>
+        <nav class="top-nav">
+          <a href="index.html" class="nav-item"><i class="ri-map-2-line"></i> 地图视图</a>
+          <a href="table.html" class="nav-item"><i class="ri-table-line"></i> 表格视图</a>
+          <a href="workspace.html" class="nav-item active"><i class="ri-robot-2-line"></i> 智能助手</a>
+        </nav>
+        <div class="user-profile">
+          <img src="https://ui-avatars.com/api/?name=Admin&background=1890ff&color=fff" alt="User" class="avatar">
+        </div>
+      </header>
+
+      <!-- 主体内容 -->
+      <main class="workspace-body">
+        <!-- 左侧：工作展示区 -->
+        <section class="work-content" id="work-content">
+          <div class="empty-state">
+            <i class="ri-robot-2-line" style="font-size: 64px; color: #d9d9d9; margin-bottom: 24px;"></i>
+            <h3>你好，我是您的智能工作助理</h3>
+            <p>请在右侧对话框中 @ 相应的数字员工来获取帮助</p>
+            <div class="assistant-tips">
+              <span class="tip-tag">@数据分析师 查看销售报表</span>
+              <span class="tip-tag">@订单助手 查询最近订单</span>
+              <span class="tip-tag">@库存管理员 检查库存预警</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 右侧：对话区 -->
+        <aside class="chat-sidebar">
+          <div class="chat-header">
+            <span class="title">数字员工会话</span>
+            <span class="status-dot"></span>
+          </div>
+          <div class="chat-messages" id="chat-messages">
+            <!-- 消息会动态插入这里 -->
+            <div class="message system">
+              <div class="bubble">
+                已连接到企业数字大脑。您可以随时 @ 助手来协助您的工作。
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-area">
+            <div class="input-tools">
+              <i class="ri-mic-line"></i>
+              <i class="ri-image-line"></i>
+            </div>
+            <textarea id="chat-input" placeholder="输入 @ 召唤数字员工，或直接输入指令..." rows="1"></textarea>
+            <button id="send-btn" class="send-btn"><i class="ri-send-plane-fill"></i></button>
+          </div>
+        </aside>
+      </main>
+    </div>
+  </body>
+</html>
