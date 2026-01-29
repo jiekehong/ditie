@@ -773,44 +773,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   sendBtn.addEventListener('click', handleInput);
 
-  renderWelcome();
-});
-
-// === Init ===
-document.addEventListener('DOMContentLoaded', () => {
-  const input = document.getElementById('chat-input') as HTMLTextAreaElement;
-  const sendBtn = document.getElementById('send-btn')!;
-
-  renderSuggestionList();
-  const list = document.querySelector('.suggestion-list')!;
-
-  input.addEventListener('input', (e) => {
-    const val = input.value;
-    const lastChar = val.slice(-1);
-    
-    // Simple logic: show list if ends with @ or just typed @
-    if (val.includes('@')) {
-      const afterAt = val.split('@').pop();
-      if (afterAt !== undefined && afterAt.length < 15 && !afterAt.includes(' ')) {
-         list.classList.add('visible');
-      } else if (lastChar === '@') {
-         list.classList.add('visible');
-      } else {
-         list.classList.remove('visible');
-      }
-    } else {
-      list.classList.remove('visible');
-    }
+  // Sidebar Interactions
+  document.querySelectorAll('.shortcut-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const name = item.querySelector('span')?.textContent;
+      addMessage(`唤起快捷功能：${name}`, 'system');
+      
+      // Map shortcuts to assistant commands
+      if (name === '新建报表') executeCommand('@汇报助手 生成一份新的销售报表');
+      if (name === '库存预警') executeCommand('@库存管理员 检查当前库存状态');
+      if (name === '员工排班') addMessage('排班系统正在同步数据，请稍后...', 'system');
+      if (name === '营销策划') executeCommand('@营销策划 开启夏季新品推广方案');
+    });
   });
 
-  input.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleInput();
-    }
+  document.querySelectorAll('.bookmark-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const name = item.querySelector('.name')?.textContent;
+      addMessage(`正在打开收藏记录：${name}`, 'system');
+      
+      if (name?.includes('销售分析')) executeCommand('@数据分析师 展示销售分析大屏');
+      if (name?.includes('KPI')) addMessage('正在加载 KPI 考评详情...', 'system');
+      if (name?.includes('补货')) executeCommand('@库存管理员 查看智能补货建议');
+    });
   });
-
-  sendBtn.addEventListener('click', handleInput);
 
   renderWelcome();
 });
